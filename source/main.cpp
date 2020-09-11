@@ -4,6 +4,8 @@
 #include <borealis.hpp>
 #include <string>
 
+#include "utils.hpp"
+
 int main(int argc, char* argv[])
 {
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
@@ -18,8 +20,17 @@ int main(int argc, char* argv[])
     rootFrame->setTitle("AIO Updater v" APP_VERSION " - powered by borealis");
     rootFrame->setIcon(BOREALIS_ASSET("icon/app_icon.jpg"));
 
+    std::string amsHash;
+    std::string amsVersion;
+    std::string fwVersion;
+    getAMSVersion(amsVersion);
+    getAMSHash(amsHash);
+    getFWVersion(fwVersion);
+
     brls::ListItem* firstItem = new brls::ListItem("Test Item");
-    brls::Label* firstLabel = new brls::Label(brls::LabelStyle::REGULAR, "Test Label", true);
+    brls::Label* firstLabel1 = new brls::Label(brls::LabelStyle::REGULAR, "FW Version: " + fwVersion, true);
+    brls::Label* firstLabel2 = new brls::Label(brls::LabelStyle::REGULAR, "AMS Version: " + amsVersion, true);
+    brls::Label* firstLabel3 = new brls::Label(brls::LabelStyle::REGULAR, "AMS Hash: " + amsHash, true);
     brls::ListItem* secondItem = new brls::ListItem("Test Item");
     brls::Label* secondLabel = new brls::Label(brls::LabelStyle::REGULAR, "Test Label", true);
     brls::ListItem* thirdItem = new brls::ListItem("Test Item");
@@ -29,7 +40,9 @@ int main(int argc, char* argv[])
 
     brls::List* updateAMSOptionsList = new brls::List();
     updateAMSOptionsList->addView(firstItem);
-    updateAMSOptionsList->addView(firstLabel);
+    updateAMSOptionsList->addView(firstLabel1);
+    updateAMSOptionsList->addView(firstLabel2);
+    updateAMSOptionsList->addView(firstLabel3);
 
     brls::List* updateSigOptionsList = new brls::List();
     updateSigOptionsList->addView(secondItem);
@@ -51,7 +64,19 @@ int main(int argc, char* argv[])
 
     brls::Application::pushView(rootFrame);
 
-    while (brls::Application::mainLoop());
+    if (isSXOS())
+    {
+        brls::Application::crash("The software was closed because an error occured:\nTrashOS is not supported by this application!\nThis application is only meant to be run under Atmosphere CFW!");
+    }
+    else if (isReiNX())
+    {
+        brls::Application::crash("The software was closed because an error occured:\nWeebOS is not supported by this application!\nThis application is only meant to be run under Atmosphere CFW!");
+    }
+    else if (!isAtmosphere())
+    {
+        brls::Application::crash("The software was closed because an error occured:\nUnknown CFW!\nThis application is only meant to be run under Atmosphere CFW!");
+    }
 
+    while (brls::Application::mainLoop());
     return EXIT_SUCCESS;
 }
