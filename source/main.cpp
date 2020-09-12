@@ -1,10 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <borealis.hpp>
 #include <string>
 
 #include "utils.hpp"
+#include "payload.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -27,56 +25,74 @@ int main(int argc, char* argv[])
     getAMSHash(amsHash);
     getFWVersion(fwVersion);
 
-    brls::ListItem* firstItem = new brls::ListItem("Test Item");
-    brls::Label* firstLabel1 = new brls::Label(brls::LabelStyle::REGULAR, "FW Version: " + fwVersion, true);
-    brls::Label* firstLabel2 = new brls::Label(brls::LabelStyle::REGULAR, "AMS Version: " + amsVersion, true);
-    brls::Label* firstLabel3 = new brls::Label(brls::LabelStyle::REGULAR, "AMS Hash: " + amsHash, true);
-    brls::ListItem* secondItem = new brls::ListItem("Test Item");
-    brls::Label* secondLabel = new brls::Label(brls::LabelStyle::REGULAR, "Test Label", true);
-    brls::ListItem* thirdItem = new brls::ListItem("Test Item");
-    brls::Label* thirdLabel = new brls::Label(brls::LabelStyle::REGULAR, "Test Label", true);
-    brls::ListItem* fourthItem = new brls::ListItem("Test Item");
-    brls::Label* fourthLabel = new brls::Label(brls::LabelStyle::REGULAR, "Test Label", true);
+    brls::List* atmosTab = new brls::List();
 
-    brls::List* updateAMSOptionsList = new brls::List();
-    updateAMSOptionsList->addView(firstItem);
-    updateAMSOptionsList->addView(firstLabel1);
-    updateAMSOptionsList->addView(firstLabel2);
-    updateAMSOptionsList->addView(firstLabel3);
+    std::string sysInfo = "Firmware Version: " + fwVersion + "\nAtmosphere Version: " + amsVersion + "\nAtmosphere Hash: " + amsHash;
+    brls::Label* sysInfoLabel = new brls::Label(brls::LabelStyle::REGULAR, sysInfo, true);
+    brls::ListItem* updateAMSItem = new brls::ListItem("Update Atmosphere");
+    brls::ListItem* rebootPayloadItem = new brls::ListItem("Reboot to Payload");
+    // load_payload
 
-    brls::List* updateSigOptionsList = new brls::List();
-    updateSigOptionsList->addView(secondItem);
-    updateSigOptionsList->addView(secondLabel);
+    updateAMSItem->getClickEvent()->subscribe([](brls::View* view){
+        brls::Dialog* dialog = new brls::Dialog("Are you sure you want to update Atmosphere?");
 
-    brls::List* updateHekateOptionsList = new brls::List();
-    updateHekateOptionsList->addView(thirdItem);
-    updateHekateOptionsList->addView(thirdLabel);
+        brls::GenericEvent::Callback updateCallback = [dialog](brls::View* view){
+            dialog->close();
+            brls::Application::notify("Updating Atmosphere!");
+        };
 
-    brls::List* settingsOptionsList = new brls::List();
-    settingsOptionsList->addView(fourthItem);
-    settingsOptionsList->addView(fourthLabel);
+        brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view){
+            dialog->close();
+        };
 
-    rootFrame->addTab("Atmosphere", updateAMSOptionsList);
-    rootFrame->addTab("Sigpatches", updateSigOptionsList);
-    rootFrame->addTab("Hekate", updateHekateOptionsList);
+        dialog->addButton("Update", updateCallback);
+        dialog->addButton("Cancel", closeCallback);
+
+        dialog->setCancelable(false);
+
+        dialog->open();
+    });
+
+    rebootPayloadItem->getClickEvent()->subscribe([](brls::View* view){
+        brls::Dialog* dialog = new brls::Dialog("Are you sure you want to reboot to payload?");
+
+        brls::GenericEvent::Callback rebootCallback = [dialog](brls::View* view){
+            dialog->close();
+            load_payload("/atmosphere/reboot_payload.bin");
+            reboot_to_payload();
+        };
+
+        brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view){
+            dialog->close();
+        };
+
+        dialog->addButton("Reboot", rebootCallback);
+        dialog->addButton("Cancel", closeCallback);
+
+        dialog->setCancelable(false);
+
+        dialog->open();
+    });
+
+    atmosTab->addView(new brls::Header("System Information", false));
+    atmosTab->addView(sysInfoLabel);
+    atmosTab->addView(new brls::Header("Options", false));
+    atmosTab->addView(updateAMSItem);
+    atmosTab->addView(rebootPayloadItem);
+
+    rootFrame->addTab("Atmosphere", atmosTab);
     rootFrame->addSeparator();
-    rootFrame->addTab("Settings", settingsOptionsList);
 
     brls::Application::pushView(rootFrame);
 
     if (isSXOS())
-    {
         brls::Application::crash("The software was closed because an error occured:\nTrashOS is not supported by this application!\nThis application is only meant to be run under Atmosphere CFW!");
-    }
     else if (isReiNX())
-    {
         brls::Application::crash("The software was closed because an error occured:\nWeebOS is not supported by this application!\nThis application is only meant to be run under Atmosphere CFW!");
-    }
     else if (!isAtmosphere())
-    {
         brls::Application::crash("The software was closed because an error occured:\nUnknown CFW!\nThis application is only meant to be run under Atmosphere CFW!");
-    }
 
     while (brls::Application::mainLoop());
+
     return EXIT_SUCCESS;
 }
