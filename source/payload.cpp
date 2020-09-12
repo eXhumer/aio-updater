@@ -1,6 +1,6 @@
-#include <switch.h>
-#include <stdio.h>
-#include <string.h>
+#include <switch.h> // svcCallSecureMonitor | splInitialize | splSetConfig | splExit | R_FAILED | u8
+#include <string.h> // memcpy | memset
+#include <stdio.h> // fopen | fread | fclose | FILE
 
 #include "payload.hpp"
 
