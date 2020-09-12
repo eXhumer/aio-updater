@@ -99,3 +99,22 @@ bool isAtmosphere()
     splExit();
     return isAtmos;
 }
+
+bool initNXServices()
+{
+    splInitialize();
+    SocketInitConfig sockConf = {
+        2,
+        0x40000,
+        0x40000,
+        0x80000,
+        0x80000,
+        0x2400,
+        0xA500,
+        0x4,
+        0x3,
+        BsdServiceType_User
+    };
+    socketInitialize(&sockConf);
+    setsysInitialize();
+}

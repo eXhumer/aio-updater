@@ -29,9 +29,10 @@ int main(int argc, char* argv[])
 
     std::string sysInfo = "Firmware Version: " + fwVersion + "\nAtmosphere Version: " + amsVersion + "\nAtmosphere Hash: " + amsHash;
     brls::Label* sysInfoLabel = new brls::Label(brls::LabelStyle::REGULAR, sysInfo, true);
+    std::string updInfo = "Latest Atmosphere Version: " + amsVersion + "\nLatest Atmosphere Hash: " + amsHash;
+    brls::Label* updInfoLabel = new brls::Label(brls::LabelStyle::REGULAR, updInfo, true);
     brls::ListItem* updateAMSItem = new brls::ListItem("Update Atmosphere");
     brls::ListItem* rebootPayloadItem = new brls::ListItem("Reboot to Payload");
-    // load_payload
 
     updateAMSItem->getClickEvent()->subscribe([](brls::View* view){
         brls::Dialog* dialog = new brls::Dialog("Are you sure you want to update Atmosphere?");
@@ -76,6 +77,8 @@ int main(int argc, char* argv[])
 
     atmosTab->addView(new brls::Header("System Information", false));
     atmosTab->addView(sysInfoLabel);
+    atmosTab->addView(new brls::Header("Update Information", false));
+    atmosTab->addView(updInfoLabel);
     atmosTab->addView(new brls::Header("Options", false));
     atmosTab->addView(updateAMSItem);
     atmosTab->addView(rebootPayloadItem);
