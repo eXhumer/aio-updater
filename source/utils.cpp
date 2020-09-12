@@ -1,6 +1,7 @@
 #include <switch.h>
 #include <sstream>
-#include <string>
+
+#include "utils.hpp"
 
 bool getFWVersion(std::string& outVersion)
 {
@@ -26,18 +27,13 @@ bool getAMSVersion(std::string& outVersion)
 {
     Result rc;
 	u64 ver;
-	// u64 fullHash;
 	SplConfigItem SplConfigItem_ExosphereVersion = (SplConfigItem)65000;
-	// SplConfigItem SplConfigItem_ExosphereVerHash = (SplConfigItem)65003;
 
 	if (R_FAILED(rc = splInitialize()))
 		return false;
 
 	if (R_FAILED(rc = splGetConfig(SplConfigItem_ExosphereVersion, &ver)))
         return false;
-
-	// if (R_FAILED(rc = splGetConfig(SplConfigItem_ExosphereVerHash, &fullHash)))
-	//     return false;
 
     u64 major = (ver >> 56) & 0xFF;
     u64 minor = (ver >> 48) & 0xFF;
